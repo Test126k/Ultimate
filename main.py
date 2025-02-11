@@ -2,6 +2,9 @@ import json
 import asyncio
 import os
 from telethon import TelegramClient, errors
+from flask import Flask
+import threading
+
 
 # Configurations
 SOURCE_CHANNEL = "https://t.me/your_source_channel"
@@ -61,3 +64,15 @@ async def main():
 
 with clients[0]:  # First client se loop start
     clients[0].loop.run_until_complete(main())
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Bot is running!"
+
+def run_flask():
+    app.run(host='0.0.0.0', port=8080)
+
+# Flask server ko background me chalane ke liye
+threading.Thread(target=run_flask, daemon=True).start()
