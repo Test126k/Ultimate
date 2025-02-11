@@ -5,7 +5,6 @@ from telethon import TelegramClient, errors
 from flask import Flask
 import threading
 
-
 # Configurations
 SOURCE_CHANNEL = "https://t.me/your_source_channel"
 DEST_CHANNEL = "https://t.me/your_destination_channel"
@@ -58,21 +57,21 @@ async def forward_messages(client):
     except Exception as e:
         print(f"Error: {e}")
 
-async def main():
+async def start_bot():
+    """Telegram bot ko background me chalane ke liye function."""
     tasks = [forward_messages(client) for client in clients]
     await asyncio.gather(*tasks)
 
-with clients[0]:  # First client se loop start
-    clients[0].loop.run_until_complete(main())
-
+# Flask Server
 app = Flask(__name__)
 
 @app.route('/')
 def home():
     return "Bot is running!"
 
-def run_flask():
-    app.run(host='0.0.0.0', port=8080)
+if __name__ == "__main__":
+    # Telegram bot ko background thread me chalane ke liye
+    threading.Thread(target=lambda: asyncio.run(start_bot()), daemon=True).start()
 
-# Flask server ko background me chalane ke liye
-threading.Thread(target=run_flask, daemon=True).start()
+    # Flask ko main thread me run karna zaroori hai
+    app.run(host='0.0.0.0', port=8080)
